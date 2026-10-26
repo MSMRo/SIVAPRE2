@@ -1,6 +1,7 @@
 # 🦟 SIVAPRE — Sistema Integrado de Vigilancia y Predicción en Salud
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![uv](https://img.shields.io/badge/uv-Astral%20Fast%20Packaging-DE5FE9.svg?style=flat&logo=python&logoColor=white)](https://docs.astral.sh/uv/)
 [![React](https://img.shields.io/badge/React-19+-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://react.dev)
 [![React Native](https://img.shields.io/badge/React%20Native-Expo%2054-000020.svg?style=flat&logo=expo&logoColor=white)](https://expo.dev)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org)
@@ -262,16 +263,22 @@ SIVAPRE/
 
 ### Opción 2: Ejecución Manual Componente por Componente
 
-#### 1. Backend (FastAPI)
+#### 1. Backend (FastAPI con `uv` - Ultrarrápido) ⚡
+
+Gracias a **uv**, levantar el backend toma segundos sin necesidad de gestionar entornos virtuales manualmente:
+
 ```bash
 cd sivapre-backend
+
+# Opción A (Recomendada con uv):
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Para poblar los datos demo con uv:
+uv run python seed_demo.py
+
+# Opción B (Tradicional con venv/pip si no tienes uv):
 python -m venv venv
-
-# En Windows:
-.\venv\Scripts\activate
-# En Linux / Mac:
-source venv/bin/activate
-
+# Activar venv (Windows: .\venv\Scripts\activate | Linux/Mac: source venv/bin/activate)
 pip install -r requirements.txt
 python seed_demo.py
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
