@@ -14,9 +14,10 @@ if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 engine = None
+max_intentos = 10 if os.getenv("DOCKER_CONTAINER") else 3
 
-# Retry hasta que PostgreSQL esté listo (máx 10 intentos)
-for intento in range(10):
+# Retry hasta que PostgreSQL esté listo
+for intento in range(max_intentos):
     try:
         candidate_engine = create_engine(DATABASE_URL)
         with candidate_engine.connect():
@@ -25,8 +26,8 @@ for intento in range(10):
         break
     except Exception as e:
         safe_db = DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL
-        print(f"[ESPERANDO] Base de datos ({safe_db})... intento {intento + 1}/10")
-        time.sleep(2)
+        print(f"[ESPERANDO] Base de datos ({safe_db})... intento {intento + 1}/{max_intentos}")
+        time.sleep(1)
 
 if engine is None:
     # Asignamos el engine para permitir arranque o reporte de errores claros en llamadas posteriores
