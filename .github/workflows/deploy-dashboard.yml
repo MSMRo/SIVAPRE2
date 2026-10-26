@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'sivapre-dashboard/**'
-      - '.github/workflows/deploy-dashboard.yml'
   workflow_dispatch:
 
 permissions:
@@ -30,15 +27,18 @@ jobs:
         working-directory: ./sivapre-dashboard
         run: npm ci
 
-      - name: Construir la aplicación para producción
+      - name: Construir la aplicación para producción (SPA relativo)
         working-directory: ./sivapre-dashboard
         env:
           CI: false
-          PUBLIC_URL: /SIVAPRE/
-          REACT_APP_API_URL: https://sivapre-api.onrender.com # O URL de backend en producción
+          PUBLIC_URL: ./
         run: npm run build
 
-      - name: Desplegar a GitHub Pages
+      - name: Asegurar archivo .nojekyll en build
+        working-directory: ./sivapre-dashboard
+        run: touch build/.nojekyll
+
+      - name: Desplegar a rama gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages

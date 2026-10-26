@@ -15,7 +15,7 @@ from app.models import Usuario, Reporte, CasoNoti, CasoNetlab, EstadoReporte
 from app.routers.auth import hash_password
 
 def seed():
-    print("🔄 Inicializando base de datos y tablas SIVAPRE...")
+    print("[INFO] Inicializando base de datos y tablas SIVAPRE...")
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
@@ -33,9 +33,9 @@ def seed():
                 activo=True
             )
             db.add(admin)
-            print("  ➕ Usuario 'admin' (password: admin123) creado.")
+            print("  [ADD] Usuario 'admin' (password: admin123) creado.")
         else:
-            print("  ℹ️ Usuario 'admin' ya existe.")
+            print("  [INFO] Usuario 'admin' ya existe.")
 
         # 2. Crear usuario Ciudadano
         ciudadano = db.query(Usuario).filter(Usuario.username == "juanperez").first()
@@ -50,7 +50,7 @@ def seed():
                 activo=True
             )
             db.add(ciudadano)
-            print("  ➕ Usuario 'juanperez' (password: 123456) creado.")
+            print("  [ADD] Usuario 'juanperez' (password: 123456) creado.")
 
         db.commit()
         db.refresh(admin)
@@ -128,7 +128,7 @@ def seed():
             ]
             for r in reportes_demo:
                 db.add(r)
-            print(f"  ➕ {len(reportes_demo)} reportes ciudadanos demo insertados.")
+            print(f"  [ADD] {len(reportes_demo)} reportes ciudadanos demo insertados.")
 
         # 4. Casos NOTI (CDC Perú)
         casos_noti_existentes = db.query(CasoNoti).count()
@@ -188,7 +188,7 @@ def seed():
             ]
             for n in noti_demo:
                 db.add(n)
-            print(f"  ➕ {len(noti_demo)} casos NOTI (CDC) insertados.")
+            print(f"  [ADD] {len(noti_demo)} casos NOTI (CDC) insertados.")
 
         # 5. Casos NETLAB (INS Perú)
         casos_netlab_existentes = db.query(CasoNetlab).count()
@@ -237,14 +237,14 @@ def seed():
             ]
             for l in netlab_demo:
                 db.add(l)
-            print(f"  ➕ {len(netlab_demo)} casos NETLAB (INS) insertados.")
+            print(f"  [ADD] {len(netlab_demo)} casos NETLAB (INS) insertados.")
 
         db.commit()
-        print("✅ Inicialización de datos completada exitosamente.")
+        print("[OK] Inicialización de datos completada exitosamente.")
 
     except Exception as e:
         db.rollback()
-        print(f"❌ Error durante el seed: {e}")
+        print(f"[ERROR] Error durante el seed: {e}")
         raise e
     finally:
         db.close()

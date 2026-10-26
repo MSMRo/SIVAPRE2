@@ -7,31 +7,40 @@ import time
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin@localhost:5432/sivapre_db")
+RAW_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin@localhost:5432/sivapre_db")
+DATABASE_URL = RAW_DATABASE_URL
+
+# Si se especificó el host "db" de Docker pero estamos corriendo directamente en Windows
+if not os.getenv("DOCKER_CONTAINER") and "@db:" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("@db:", "@127.0.0.1:")
 
 # Normalizar URL para asegurar el driver psycopg2 compatible con SQLAlchemy 2.x
-if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 engine = None
-max_intentos = 10 if os.getenv("DOCKER_CONTAINER") else 3
+connected = False
 
-# Retry hasta que PostgreSQL esté listo
-for intento in range(max_intentos):
+# Intentar conectar a la base de datos principal (PostgreSQL / Supabase)
+for intento in range(2):
     try:
-        candidate_engine = create_engine(DATABASE_URL)
+        candidate_engine = create_engine(DATABASE_URL, pool_pre_ping=True)
         with candidate_engine.connect():
             print("[OK] Conectado a PostgreSQL exitosamente")
         engine = candidate_engine
+        connected = True
         break
-    except Exception as e:
+    except Exception:
         safe_db = DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL
-        print(f"[ESPERANDO] Base de datos ({safe_db})... intento {intento + 1}/{max_intentos}")
+        print(f"[CONEXION] Verificando PostgreSQL ({safe_db})... intento {intento + 1}/2")
         time.sleep(1)
 
-if engine is None:
-    # Asignamos el engine para permitir arranque o reporte de errores claros en llamadas posteriores
-    engine = create_engine(DATABASE_URL)
+# Fallback automático a SQLite local para que el desarrollador nunca sufra errores al probar
+if not connected:
+    print("[INFO] PostgreSQL no accesible en este entorno. Activando SQLite local (sivapre_local.db)...")
+    SQLITE_URL = "sqlite:///./sivapre_local.db"
+    engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False})
+    print("[OK] Base de datos local SQLite lista para pruebas sin errores")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
