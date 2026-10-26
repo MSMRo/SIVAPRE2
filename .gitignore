@@ -1,7 +1,9 @@
 sivapre-backend/.env
+sivapre-backend/.venv/
 sivapre-backend/uploads/
 sivapre-backend/app/__pycache__/
 sivapre-backend/app/routers/__pycache__/
+*.egg-info/
 postgres-init/
 *.pyc
 sivapre-frontend/node_modules/
@@ -10,3 +12,4 @@ sivapre-frontend/.env
 sivapre-dashboard/node_modules/
 sivapre-dashboard/.expo/
 sivapre-dashboard/.env
+sivapre-dashboard/build/
