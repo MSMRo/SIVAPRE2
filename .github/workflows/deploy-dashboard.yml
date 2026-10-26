@@ -1,0 +1,45 @@
+name: Despliegue Dashboard SIVAPRE en GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sivapre-dashboard/**'
+      - '.github/workflows/deploy-dashboard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'sivapre-dashboard/package-lock.json'
+
+      - name: Instalar dependencias del Dashboard
+        working-directory: ./sivapre-dashboard
+        run: npm ci
+
+      - name: Construir la aplicación para producción
+        working-directory: ./sivapre-dashboard
+        env:
+          CI: false
+          PUBLIC_URL: /SIVAPRE/
+          REACT_APP_API_URL: https://sivapre-api.onrender.com # O URL de backend en producción
+        run: npm run build
+
+      - name: Desplegar a GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: sivapre-dashboard/build
